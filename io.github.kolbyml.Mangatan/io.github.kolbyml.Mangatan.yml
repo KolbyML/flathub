@@ -1,0 +1,45 @@
+app-id: io.github.kolbyml.Mangatan
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: mangatan
+
+finish-args:
+  - --share=network     
+  - --socket=wayland  
+  - --socket=fallback-x11 
+  - --device=dri   
+  - --filesystem=host   
+
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk21
+
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk21/install.sh
+    cleanup:
+      - /usr/lib/sdk/openjdk21/install.sh
+
+  - name: mangatan
+    buildsystem: simple
+    build-commands:
+      - cargo build --release --locked
+      
+      - install -D target/release/mangatan /app/bin/mangatan
+      - install -D bin/mangatan/data/io.github.kolbyml.Mangatan.desktop /app/share/applications/io.github.kolbyml.Mangatan.desktop
+      - install -D bin/mangatan/data/io.github.kolbyml.Mangatan.metainfo.xml /app/share/metainfo/io.github.kolbyml.Mangatan.metainfo.xml
+      - install -D bin/mangatan/resources/faviconlogo.png /app/share/icons/hicolor/128x128/apps/io.github.kolbyml.Mangatan.png
+
+    build-options:
+      env:
+        JAVA_HOME: /usr/lib/sdk/openjdk21
+        CARGO_HOME: /run/build/mangatan/cargo
+
+sources:
+      - type: git
+        url: https://github.com/KolbyML/Mangatan
+        branch: master
+      
+      - cargo-sources.json
